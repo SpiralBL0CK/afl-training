@@ -25,7 +25,8 @@ case "$PASSMETHOD" in
     fi
     PASS=$(head -c 9 /dev/urandom | base64)
     IP=$(curl https://api.ipify.org)
-    echo "$IP $PASS" | nc $PASSHOST $PASSPORT # network listeners get free access to our instances
+    echo "$(hostname) $IP $PASS" | nc $PASSHOST $PASSPORT # network listeners get free access to our instances ¯\_(ツ)_/¯
+    # $PASSHOST should run something like "nc -kl $PASSPORT | tee passwords.txt"
     ;;
 *)
     echo "You must specify a method for setting the fuzzer user's password, or use a different entrypoint." >&2
@@ -41,5 +42,9 @@ if [[ -n "$MANUALCPUS" ]]; then
 fi
 echo "stty -ixon" >> /etc/profile # don't treat ctrl+s as scrolllock
 
+if [[ -n "$SYSTEMCONFIG" ]]; then
+    /home/fuzzer/AFLplusplus/afl-system-config
+fi
+
 echo "Spawning SSHd"
-/usr/sbin/sshd -D
+/usr/sbin/sshd -D -p ${SSHPORT-22}
