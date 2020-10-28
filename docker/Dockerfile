@@ -22,7 +22,7 @@ RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 #   user tools
 #   debugging tools
 RUN apt-get update && apt-get install -y \
-    git build-essential curl libssl-dev sudo libtool libtool-bin libglib2.0-dev bison flex automake python3 python3-dev python3-setuptools python-is-python3 libpixman-1-dev gcc-9-plugin-dev \
+    git build-essential curl libssl-dev sudo libtool libtool-bin libglib2.0-dev bison flex automake python3 python3-dev python3-setuptools python-is-python3 libpixman-1-dev gcc-9-plugin-dev cgroup-tools \
     clang-11 clang-tools-11 libc++1-11 libc++-11-dev libc++abi1-11 libc++abi-11-dev libclang1-11 libclang-11-dev libclang-common-11-dev libclang-cpp11 libclang-cpp11-dev liblld-11 liblld-11-dev liblldb-11 liblldb-11-dev libllvm11 libomp-11-dev libomp5-11 lld-11 lldb-11 python3-lldb-11 llvm-11 llvm-11-dev llvm-11-runtime llvm-11-tools \
     rsync autopoint bison gperf autoconf texinfo gettext \
     libtool pkg-config libz-dev python2.7-dev \
@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y \
     emacs vim nano screen htop man manpages-posix-dev wget httpie bash-completion \
     gdb \
     && rm -rf /var/lib/apt/lists
+
+RUN echo y | unminimize
 
 # Users & SSH
 ##############
@@ -47,7 +49,8 @@ RUN mkdir /var/run/sshd
 RUN update-alternatives --install /usr/bin/clang clang $(which clang-11) 1 && \
     update-alternatives --install /usr/bin/clang++ clang++ $(which clang++-11) 1 && \
     update-alternatives --install /usr/bin/llvm-config llvm-config $(which llvm-config-11) 1 && \
-    update-alternatives --install /usr/bin/llvm-symbolizer llvm-symbolizer $(which llvm-symbolizer-11) 1
+    update-alternatives --install /usr/bin/llvm-symbolizer llvm-symbolizer $(which llvm-symbolizer-11) 1 && \
+    update-alternatives --install /usr/bin/llvm-cov llvm-cov $(which llvm-cov-11) 1
 
 # (environment variables won't be visible in the SSH session unless added to /etc/profile or similar)
 ENV AFLVERSION=2.68c
@@ -71,6 +74,10 @@ RUN git clone https://github.com/mykter/afl-training.git workshop
 # ADD . ./local-workshop
 # USER root
 # RUN chown -R fuzzer:fuzzer local-workshop
+
+WORKDIR /home/fuzzer/workshop
+RUN http https://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2/ntp-4.2.2.tar.gz | tar xz -C challenges/ntpq
+RUN git submodule init && git submodule update
 
 # By default run an SSH daemon. To run locally instead, use something like this:
 #    docker run -it --user fuzzer afl-training:latest /bin/bash

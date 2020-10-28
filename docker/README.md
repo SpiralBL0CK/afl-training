@@ -51,7 +51,7 @@ You need privileged containers for CAP_PTRACE for debugging and the necessary cg
 with `-m none` and `ASAN_OPTIONS=detect_leaks=0`, and debugging is not the focus of the workshop.
 
 We have to configure the container's SSH daemon to listen on a non-default port, as otherwise it conflicts with the
-hosts.
+host's.
 
         $ gcloud compute firewall-rules create allow-workshop-ssh \
                 --allow=tcp:2222 --direction=INGRESS --network=grayhat --target-tags=student
@@ -68,7 +68,7 @@ hosts.
 
 Spin up some instances (number defined in the brace expansion at the end).
 
-      $ parallel --verbose --keep-order "gcloud compute instances create afl-training-{#} --zone=us-central1-a --source-instance-template=afl-training" ::: {1..2}
+      $ parallel --verbose --keep-order "gcloud compute instances create afl-training-{} --zone=us-central1-a --source-instance-template=afl-training" ::: {1..2}
 
 ## Running
 
